@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Notebook App</title>
+    
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#000000">
+    <link rel="icon" href="icon-192x192.png">
+    
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: Arial, sans-serif;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden; /* Prevents unnecessary scrolling */
+            background-color: black;
+        }
+
+        #installBtn {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background-color: red;
+            color: white;
+            padding: 10px;
+            border: 1px solid white; /* Added border to ensure visibility while blinking */
+            cursor: pointer;
+            border-radius: 5px;
+            z-index: 10;
+            display: none;
+            /* ✅ Blinking Animation */
+            animation: blinker 1.5s linear infinite;
+        }
+
+        /* ✅ Animation Logic */
+        @keyframes blinker {
+            50% {
+                opacity: 0.2;
+            }
+        }
+
+        .main-content {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .center-container {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between; /* Pushes button to the bottom */
+            align-items: center;
+            text-align: center;
+        }
+
+        .logo-container {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            width: 100%;
+        }
+
+        .logo {
+            width: 100%; /* Image fits smartphone width */
+            height: auto;
+            max-height: 70vh; /* Prevents image from overlapping button */
+            object-fit: contain;
+        }
+
+        .button {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 15px 20px;
+            font-size: 16px;
+            font-weight: bold;
+            color: white;
+            text-decoration: none;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+            margin-bottom: 30px; /* Space from footer */
+            width: 80%; /* Consistent sizing on mobile */
+        }
+
+        /* ✅ Button Colors */
+        .red { background-color: red; }
+
+        .footer {
+            background-color: yellow;
+            padding: 10px;
+            font-weight: bold;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+    <button id="installBtn">Install App</button>
+
+    <div class="main-content">
+        <div class="center-container">
+            <div class="logo-container">
+                <img src="https://i.imgur.com/PzE158W.jpeg" alt="App Icon" class="logo">
+            </div>
+
+           <a href="https://masomo.website/?pg=eventsui" class="button red">GO TO DASHBOARD NOW!</a>
+
+        </div>
+    </div>
+
+    <div class="footer">
+        All rights reserved @ Masomo Digital Library
+    </div>
+
+    <script>
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.register('sw.js')
+                .then(reg => console.log("Service Worker Registered"))
+                .catch(err => console.log("Service Worker Error:", err));
+        }
+
+        let deferredPrompt;
+        const installBtn = document.getElementById("installBtn");
+
+        window.addEventListener("beforeinstallprompt", (e) => {
+            e.preventDefault();
+            deferredPrompt = e;
+            installBtn.style.display = "block";
+        });
+
+        installBtn.addEventListener("click", () => {
+            if (deferredPrompt) {
+                deferredPrompt.prompt();
+                deferredPrompt.userChoice.then((choiceResult) => {
+                    if (choiceResult.outcome === "accepted") {
+                        console.log("User accepted PWA installation");
+                        installBtn.style.display = "none";
+                    }
+                    deferredPrompt = null;
+                });
+            }
+        });
+
+        window.addEventListener("appinstalled", () => {
+            console.log("App was installed");
+            installBtn.style.display = "none";
+        });
+    </script>
+</body>
+</html>
